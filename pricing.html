@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plans & Pricing</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background-color: #f9fafb;
+        background-image: radial-gradient(circle, #c8d0d8 1px, transparent 1px);
+        background-size: 36px 36px;
+        color: #111;
+        min-height: 100vh;
+      }
+
+      /* ── Page wrapper ── */
+      .page {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 80px 24px 60px;
+      }
+
+      /* ── Hero ── */
+      .hero {
+        text-align: center;
+        margin-bottom: 48px;
+      }
+
+      .hero .eyebrow {
+        font-size: 0.95rem;
+        color: #444;
+        margin-bottom: 20px;
+        letter-spacing: 0.01em;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.4rem, 6vw, 3.8rem);
+        font-weight: 900;
+        line-height: 1.08;
+        text-transform: uppercase;
+        letter-spacing: -0.01em;
+        margin-bottom: 28px;
+      }
+
+      .hero .subtitle {
+        font-size: 1.05rem;
+        color: #555;
+        max-width: 420px;
+        margin: 0 auto 40px;
+        line-height: 1.6;
+      }
+
+      /* ── Toggle ── */
+      .toggle-wrap {
+        display: inline-flex;
+        background: #e5e7eb;
+        border-radius: 999px;
+        padding: 4px;
+        gap: 2px;
+      }
+
+      .toggle-btn {
+        padding: 8px 28px;
+        border: none;
+        border-radius: 999px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        background: transparent;
+        color: #555;
+        transition: background 0.2s, color 0.2s;
+      }
+
+      .toggle-btn.active {
+        background: #fff;
+        color: #111;
+        font-weight: 600;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      }
+
+      /* ── Cards ── */
+      /*
+        Subgrid approach: .cards is a 3-column grid.
+        Each .card spans 6 row tracks and uses grid-template-rows: subgrid,
+        so all three cards share the same row sizes.
+        Result: title / desc / price / button / divider / features
+        all snap to the same horizontal line across cards.
+        Extra space from longer descriptions stays within the desc row,
+        keeping everything below it (price, button, etc.) aligned.
+      */
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        column-gap: 20px;
+        row-gap: 20px;   /* becomes the spacing between sections inside each card */
+        margin-bottom: 48px;
+      }
+
+      /* ── Per-card gradient colors ── */
+      .cards > .card:nth-child(1) { --card-color: #E85BC3; }
+      .card-wrap                  { --card-color: #17A358; } /* inherits into inner .card */
+      .cards > .card:nth-child(3) { --card-color: #2D6FF2; }
+
+      /*
+        .card-wrap is a transparent shell that becomes the subgrid grid item
+        for the middle card. It passes the 6 shared row tracks down to the
+        inner .card, but has NO overflow clip — so the badge can sit freely
+        on top without being hidden.
+      */
+      .card-wrap {
+        grid-row: span 6;
+        display: grid;
+        grid-template-rows: subgrid;
+        position: relative;   /* badge is positioned relative to this */
+      }
+
+      /* The inner card spans all 6 rows of the wrap */
+      .card-wrap > .card {
+        grid-row: 1 / -1;
+        z-index: 1;           /* below the badge (z-index: 3) */
+      }
+
+      .card {
+        background: #fff;
+        border: 1px solid #e0e3e8;
+        transition: border-color 0.35s ease, transform 0.35s ease;
+        border-radius: 16px;
+        padding: 28px 24px;
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+
+        /* Each card spans 6 shared row tracks */
+        grid-row: span 6;
+        display: grid;
+        grid-template-rows: subgrid;
+        align-items: start;
+      }
+
+      /* Layer 1 — spinning cone gradient */
+      .card::before {
+        content: '';
+        position: absolute;
+        width: 250%;
+        aspect-ratio: 1;
+        top: 50%;
+        left: 50%;
+        translate: -50% -50%;
+        background: conic-gradient(
+          from 0deg,
+          transparent 0%,
+          var(--card-color) 8%,
+          color-mix(in srgb, var(--card-color) 40%, transparent) 20%,
+          transparent 32%,
+          transparent 100%
+        );
+        animation: card-spin 1.2s linear infinite;
+        animation-play-state: paused;
+        opacity: 0;
+        transition: opacity 0.35s ease;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* Layer 2 — interior mask (always on, so gradient never bleeds through) */
+      .card::after {
+        content: '';
+        position: absolute;
+        inset: 2px;
+        background: #fff;
+        border-radius: 14px;
+        opacity: 1;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      /* Lift all card content above both layers */
+      .card > * { z-index: 2; }
+
+      /* Hover: accent border + scale */
+      .card:hover {
+        border-color: color-mix(in srgb, var(--card-color) 30%, transparent);
+        transform: scale(1.05);
+        z-index: 10;
+      }
+
+      /* Card 2 lives inside .card-wrap — scale the wrapper so the badge scales too */
+      .card-wrap {
+        transition: transform 0.35s ease;
+      }
+      .card-wrap:hover {
+        transform: scale(1.05);
+        z-index: 10;
+      }
+
+      /* Hover: start spin + fade in both layers */
+      .card:hover::before {
+        animation-play-state: running;
+        opacity: 1;
+      }
+
+
+      @keyframes card-spin {
+        to { transform: rotate(360deg); }
+      }
+
+      /* ── Best-offer badge ── */
+      .badge {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #16a34a;
+        color: #fff;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 4px 14px;
+        border-radius: 999px;
+        white-space: nowrap;
+        z-index: 3;
+      }
+
+      /* ── Card title ── */
+      .card-title {
+        font-size: 1rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      /* ── Card description ── */
+      .card-desc {
+        font-size: 0.82rem;
+        color: #666;
+        line-height: 1.55;
+      }
+
+      /* ── Price ── */
+      .price-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+      }
+
+      .price-amount {
+        font-size: 2.4rem;
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      .price-meta {
+        display: flex;
+        flex-direction: column;
+        font-size: 0.75rem;
+        line-height: 1.4;
+      }
+
+      .price-meta .period {
+        font-weight: 500;
+        color: #000000;
+      }
+
+      .price-meta .billing {
+        color: rgba(0, 0, 0, 0.7);
+      }
+
+      /* ── CTA button ── */
+      .btn-trial {
+        display: block;
+        width: 100%;
+        padding: 11px;
+        border: 1.5px solid #d0d4da;
+        border-radius: 8px;
+        background: #fff;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #111;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        transition: background 0.35s ease, border-color 0.35s ease, color 0.35s ease;
+      }
+
+      .card:hover .btn-trial {
+        background: var(--card-color);
+        border-color: var(--card-color);
+        color: #fff;
+      }
+
+      /* ── Card divider ── */
+      .card-divider {
+        border: none;
+        border-top: 1px solid #d0d4da;
+        margin: 0;
+        align-self: center;
+        width: 100%;
+      }
+
+      /* ── Feature list ── */
+      .features {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+      }
+
+      .features li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.84rem;
+        color: #333;
+      }
+
+      /* Colored check icon */
+      .check {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: #fff;
+      }
+
+      .check-pink  { background: #e879a0; }
+      .check-green { background: #16a34a; }
+      .check-blue  { background: #3b82f6; }
+
+      /* ── Footer note ── */
+      .footer-note {
+        text-align: center;
+        font-size: 0.875rem;
+        color: #555;
+      }
+
+      .footer-note a {
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .footer-note a:hover { text-decoration: underline; }
+
+      /* ── No hover on touch devices ── */
+      @media (hover: none) {
+        .card:hover,
+        .card-wrap:hover {
+          transform: none;
+          border-color: #e0e3e8;
+        }
+        .card:hover::before,
+        .card-wrap:hover > .card::before {
+          animation-play-state: paused;
+          opacity: 0;
+        }
+        .card:hover .btn-trial {
+          background: #fff;
+          border-color: #d0d4da;
+          color: #111;
+        }
+      }
+
+      /* ── Responsive ── */
+      @media (max-width: 720px) {
+        .page {
+          padding: 48px 16px 40px;
+        }
+
+        .hero h1 {
+          font-size: clamp(1.6rem, 8vw, 2.4rem);
+        }
+
+        .hero .subtitle {
+          font-size: 0.9rem;
+        }
+
+        .hero .eyebrow {
+          font-size: 0.85rem;
+        }
+
+        /* Stack cards in a single column */
+        .cards {
+          grid-template-columns: 1fr;
+          row-gap: 24px;
+        }
+
+        .card-title {
+          font-size: 0.88rem;
+        }
+
+        .card-desc {
+          font-size: 0.78rem;
+        }
+
+        .price-amount {
+          font-size: 2rem;
+        }
+
+        .price-meta {
+          font-size: 0.7rem;
+        }
+
+        .btn-trial {
+          font-size: 0.82rem;
+          padding: 10px;
+        }
+
+        .features li {
+          font-size: 0.8rem;
+        }
+
+        .footer-note {
+          font-size: 0.8rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="page">
+
+      <!-- Hero -->
+      <section class="hero">
+        <p class="eyebrow">Plans &amp; Pricing</p>
+        <h1>Flexible Pricing For<br>Growing Banks</h1>
+        <p class="subtitle">Optimize payment accuracy and manage transfers with secure workflows.</p>
+
+        <!-- Toggle -->
+        <div class="toggle-wrap">
+          <button class="toggle-btn active" id="btn-monthly">Monthly</button>
+          <button class="toggle-btn" id="btn-yearly">Yearly</button>
+        </div>
+      </section>
+
+      <!-- Pricing cards -->
+      <div class="cards">
+
+        <!-- Essential -->
+        <div class="card">
+          <p class="card-title">Essential Plan</p>
+          <p class="card-desc">Perfect for small teams handling payment and transfers daily.</p>
+          <div class="price-row">
+            <span class="price-amount" id="price-essential">$249</span>
+            <div class="price-meta">
+              <span class="period">monthly</span>
+              <span class="billing" id="billing-essential">billed annually</span>
+            </div>
+          </div>
+          <a class="btn-trial" href="#">Start free trial</a>
+          <hr class="card-divider" />
+          <ul class="features">
+            <li><span class="check check-pink">✓</span> Up to 10 team seats</li>
+            <li><span class="check check-pink">✓</span> Role-based permissions</li>
+            <li><span class="check check-pink">✓</span> Tracking dashboard</li>
+            <li><span class="check check-pink">✓</span> Payment scheduling</li>
+            <li><span class="check check-pink">✓</span> Priority email support</li>
+            <li><span class="check check-pink">✓</span> Monthly finance reports</li>
+          </ul>
+        </div>
+
+        <!-- Global (Best-offer) — wrapped so badge escapes overflow:hidden -->
+        <div class="card-wrap">
+          <span class="badge">Best-offer</span>
+          <div class="card">
+          <p class="card-title">Global Plan</p>
+          <p class="card-desc">Built for scaling companies with finance teams and compliance needs.</p>
+          <div class="price-row">
+            <span class="price-amount" id="price-global">$249</span>
+            <div class="price-meta">
+              <span class="period">monthly</span>
+              <span class="billing" id="billing-global">billed annually</span>
+            </div>
+          </div>
+          <a class="btn-trial" href="#">Start free trial</a>
+          <hr class="card-divider" />
+          <ul class="features">
+            <li><span class="check check-green">✓</span> Up to 10 team seats</li>
+            <li><span class="check check-green">✓</span> Role-based permissions</li>
+            <li><span class="check check-green">✓</span> Tracking dashboard</li>
+            <li><span class="check check-green">✓</span> Payment scheduling</li>
+            <li><span class="check check-green">✓</span> Priority email support</li>
+            <li><span class="check check-green">✓</span> Monthly finance reports</li>
+          </ul>
+          </div><!-- /.card -->
+        </div><!-- /.card-wrap -->
+
+        <!-- Advanced -->
+        <div class="card">
+          <p class="card-title">Advanced</p>
+          <p class="card-desc">For small teams and start-ups sending, receiving and managing global payments.</p>
+          <div class="price-row">
+            <span class="price-amount" id="price-advanced">$449</span>
+            <div class="price-meta">
+              <span class="period">monthly</span>
+              <span class="billing" id="billing-advanced">billed annually</span>
+            </div>
+          </div>
+          <a class="btn-trial" href="#">Start free trial</a>
+          <hr class="card-divider" />
+          <ul class="features">
+            <li><span class="check check-blue">✓</span> Up to 10 team seats</li>
+            <li><span class="check check-blue">✓</span> Role-based permissions</li>
+            <li><span class="check check-blue">✓</span> Tracking dashboard</li>
+            <li><span class="check check-blue">✓</span> Payment scheduling</li>
+            <li><span class="check check-blue">✓</span> Priority email support</li>
+            <li><span class="check check-blue">✓</span> Monthly finance reports</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Footer note -->
+      <p class="footer-note">
+        All plans include a 14-day free trail. No credit card required. Questions?
+        <a href="#">See our FAQ →</a>
+      </p>
+
+    </div>
+
+    <script>
+      const btnMonthly = document.getElementById('btn-monthly');
+      const btnYearly  = document.getElementById('btn-yearly');
+
+      const prices = {
+        monthly: { essential: '$249', global: '$249', advanced: '$449' },
+        yearly:  { essential: '$199', global: '$199', advanced: '$359' },
+      };
+
+      function setBilling(isYearly) {
+        const set  = isYearly ? prices.yearly  : prices.monthly;
+        const note = isYearly ? 'billed monthly' : 'billed annually';
+
+        document.getElementById('price-essential').textContent = set.essential;
+        document.getElementById('price-global').textContent    = set.global;
+        document.getElementById('price-advanced').textContent  = set.advanced;
+
+        ['essential', 'global', 'advanced'].forEach(id => {
+          document.getElementById('billing-' + id).textContent = note;
+        });
+
+        btnMonthly.classList.toggle('active', !isYearly);
+        btnYearly.classList.toggle('active',   isYearly);
+      }
+
+      btnMonthly.addEventListener('click', () => setBilling(false));
+      btnYearly.addEventListener('click',  () => setBilling(true));
+    </script>
+
+  </body>
+</html>
