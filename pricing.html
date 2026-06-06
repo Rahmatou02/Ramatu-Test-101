@@ -180,9 +180,13 @@
       /* Lift all card content above both layers */
       .card > * { z-index: 2; }
 
-      /* Hover: accent border + scale */
+      /* Hover: accent border — applies to all cards */
       .card:hover {
         border-color: color-mix(in srgb, var(--card-color) 30%, transparent);
+      }
+
+      /* Scale + z-index only for cards 1 & 3 (direct children of .cards) */
+      .cards > .card:hover {
         transform: scale(1.05);
         z-index: 10;
       }
@@ -351,12 +355,13 @@
       /* ── No hover on touch devices ── */
       @media (hover: none) {
         .card:hover,
+        .cards > .card:hover,
         .card-wrap:hover {
           transform: none;
           border-color: #e0e3e8;
+          z-index: auto;
         }
-        .card:hover::before,
-        .card-wrap:hover > .card::before {
+        .card:hover::before {
           animation-play-state: paused;
           opacity: 0;
         }
