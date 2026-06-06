@@ -187,7 +187,7 @@
 
       /* Scale + z-index only for cards 1 & 3 (direct children of .cards) */
       .cards > .card:hover {
-        transform: scale(1.05);
+        transform: scale(1.02);
         z-index: 10;
       }
 
@@ -196,7 +196,7 @@
         transition: transform 0.35s ease;
       }
       .card-wrap:hover {
-        transform: scale(1.05);
+        transform: scale(1.02);
         z-index: 10;
       }
 
@@ -477,7 +477,7 @@
           <p class="card-title">Global Plan</p>
           <p class="card-desc">Built for scaling companies with finance teams and compliance needs.</p>
           <div class="price-row">
-            <span class="price-amount" id="price-global">$249</span>
+            <span class="price-amount" id="price-global">$349</span>
             <div class="price-meta">
               <span class="period">monthly</span>
               <span class="billing" id="billing-global">billed annually</span>
@@ -534,8 +534,8 @@
       const btnYearly  = document.getElementById('btn-yearly');
 
       const prices = {
-        monthly: { essential: '$249', global: '$249', advanced: '$449' },
-        yearly:  { essential: '$199', global: '$199', advanced: '$359' },
+        monthly: { essential: '$249', global: '$349', advanced: '$449' },
+        yearly:  { essential: '$199', global: '$299', advanced: '$359' },
       };
 
       function setBilling(isYearly) {
